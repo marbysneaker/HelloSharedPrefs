@@ -15,13 +15,18 @@
  */
 package com.example.android.hellosharedprefs;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * HelloSharedPrefs is an adaptation of the HelloToast app from chapter 1.
@@ -49,11 +54,19 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences mPreferences;
     private String sharePrefFile = "com.example.android.hellosharedprefs";
 
+    CheckBox remember;
+
+    boolean isChecked;
+
+
+    Button settingsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        remember = findViewById(R.id.checkBox);
 
         // Initialize views, color
         mShowCountTextView = findViewById(R.id.count_textview);
@@ -62,17 +75,25 @@ public class MainActivity extends AppCompatActivity {
 
         mPreferences = getSharedPreferences(sharePrefFile, MODE_PRIVATE);
 
-        // Restore the saved instance state.
-        if (savedInstanceState != null) {
+        settingsButton = findViewById(R.id.SettingsButton);
+        mCount = mPreferences.getInt(COUNT_KEY, 0);
+        mShowCountTextView.setText(String.format("%s", mCount));
+        mColor = mPreferences.getInt(COLOR_KEY, mColor);
+        mShowCountTextView.setBackgroundColor(mColor);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent settingsActivityIntent = new Intent(MainActivity.this, Settings.class);
 
-            mCount = savedInstanceState.getInt(COUNT_KEY);
-            if (mCount != 0) {
-                mShowCountTextView.setText(String.format("%s", mCount));
+                Bundle bundle = new Bundle();
+                bundle.putInt("mcount", mCount);
+                bundle.putInt("mcolor", mColor);
+                settingsActivityIntent.putExtras(bundle);
+                startActivity(settingsActivityIntent);
+
             }
+        });
 
-            mColor = savedInstanceState.getInt(COLOR_KEY);
-            mShowCountTextView.setBackgroundColor(mColor);
-        }
     }
 
     /**
@@ -130,15 +151,23 @@ public class MainActivity extends AppCompatActivity {
         mColor = ContextCompat.getColor(this,
                 R.color.default_background);
         mShowCountTextView.setBackgroundColor(mColor);
+
+        //clear preferences
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.clear();
+        preferencesEditor.apply();
     }
 
     @Override
     protected void onPause() {
+
         super.onPause();
 
-        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
-        preferencesEditor.putInt(COUNT_KEY, mCount);
-        preferencesEditor.putInt(COLOR_KEY, mColor);
-        preferencesEditor.apply();
+
     }
+
+
+
 }
+
+
