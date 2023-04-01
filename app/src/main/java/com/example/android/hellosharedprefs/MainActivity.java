@@ -47,9 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView mShowCountTextView;
 
     // Key for current count
-    private final String COUNT_KEY = "count";
+    private final String COUNT_KEY = "mcount";
     // Key for current color
-    private final String COLOR_KEY = "color";
+    private final String COLOR_KEY = "mcolor";
 
     private SharedPreferences mPreferences;
     private String sharePrefFile = "com.example.android.hellosharedprefs";
@@ -75,24 +75,20 @@ public class MainActivity extends AppCompatActivity {
 
         mPreferences = getSharedPreferences(sharePrefFile, MODE_PRIVATE);
 
-        settingsButton = findViewById(R.id.SettingsButton);
-        mCount = mPreferences.getInt(COUNT_KEY, 0);
-        mShowCountTextView.setText(String.format("%s", mCount));
-        mColor = mPreferences.getInt(COLOR_KEY, mColor);
-        mShowCountTextView.setBackgroundColor(mColor);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent settingsActivityIntent = new Intent(MainActivity.this, Settings.class);
 
-                Bundle bundle = new Bundle();
-                bundle.putInt("mcount", mCount);
-                bundle.putInt("mcolor", mColor);
-                settingsActivityIntent.putExtras(bundle);
-                startActivity(settingsActivityIntent);
 
-            }
-        });
+
+        isChecked = mPreferences.getBoolean("isChecked",false);
+//        check if the check box is checked, if it is processed saved data
+        if(isChecked == true) {
+
+
+            mCount = mPreferences.getInt(COUNT_KEY, 0);
+            mShowCountTextView.setText(String.format("%s", mCount));
+            mColor = mPreferences.getInt(COLOR_KEY, mColor);
+            mShowCountTextView.setBackgroundColor(mColor);
+        }
+
 
     }
 
@@ -160,14 +156,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-
+        saveData();
         super.onPause();
 
 
     }
+//    saved data by checking the check box and send user a message that the data is saved
+    public void saveData(){
 
+        if(remember.isChecked()){
+            isChecked = true;
+        }
+        else{
+            isChecked = false;
+        }
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putInt("mcount", mCount);
+        editor.putInt("mcolor",mColor);
+        editor.putBoolean("isChecked", isChecked);
+        editor.commit();
+        Toast.makeText(this, "data is saved", Toast.LENGTH_SHORT).show();
+    }
 
 
 }
+
+
 
 
